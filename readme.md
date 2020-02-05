@@ -1,3 +1,6 @@
+# Face tracking with OpenCV
+![](assets/preview.gif)
+
 ## Getting Started (using Python virtualenv)
 
 You need to have Python installed in your computer.

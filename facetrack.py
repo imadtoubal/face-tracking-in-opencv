@@ -2,9 +2,10 @@ import cv2
 import numpy as np 
 import math
 
-path_to_video = 'video2.mp4'
+path_to_video = 'video.mp4'
 margin = 80
 threshold = 10
+
 def lerp(a, b, p):
     return math.floor(a + (b - a) * p)
 
@@ -44,6 +45,7 @@ cap = cv2.VideoCapture(path_to_video)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 first_frame = True
+f = 0
 x = -1
 while(True):
     # Capture frame-by-frame
@@ -109,10 +111,11 @@ while(True):
     
     # Display the resulting frame
     try:
-        cv2.imshow('frame', patch)
+        cv2.imwrite('output_{}.png'.format(f), patch)
+        f = f + 1
         # cv2.imshow('frame', gray)
     except:
-        print('finding face')
+        print('output/finding face')
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
