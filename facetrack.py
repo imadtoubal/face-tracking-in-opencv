@@ -2,11 +2,12 @@ import cv2
 import numpy as np 
 import math
 
-path_to_video = 'video.mp4'
-margin = 50
+path_to_video = 'video2.mp4'
+margin = 80
+threshold = 10
+def lerp(a, b, p):
+    return math.floor(a + (b - a) * p)
 
-
-# Helper function
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
     # grab the image size
@@ -43,6 +44,7 @@ cap = cv2.VideoCapture(path_to_video)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 first_frame = True
+x = -1
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -58,42 +60,67 @@ while(True):
     ratio = height / height_re
 
     # Detect the faces
-    faces = face_cascade.detectMultiScale(gray_re, 1.2, 5)
+    faces = face_cascade.detectMultiScale(gray_re, 1.1, 5)
 
     # Draw the rectangle around each face
     maxArea = 0
     minDist = np.inf
+    
+    
     for (_x, _y, _w, _h) in faces:
-
+        # cv2.rectangle(gray, (_x, _y), (x+fw, y+fh), (255, 0, 0), 2)
         if  first_frame and _w*_h > maxArea:
             x, y, w, h = _x, _y, _w, _h
-            first_frame = False
-
-        elif (_x - xp) ^ 2 + (_y - yp) ^ 2 < minDist:
+    
+        elif (_x - _xp) ** 2 + (_y - _yp) ** 2 < minDist:
             x, y, w, h = _x, _y, _w, _h
-            minDist = (_x - xp) ^ 2 + (_y - yp) ^ 2  
-        
+            minDist = (_x - _xp) ** 2 + (_y - _yp) ** 2  
+            
         maxArea = w*h
-        xp = x
-        yp = y
-        
+        _xp = x
+        _yp = y
+
 
     #If one or more faces are found, draw a rectangle around the
     #largest face present in the picture
     if maxArea > 0 :
-        x = max(math.floor(x * ratio - margin), 0)
-        y = max(math.floor(y * ratio - margin), 0)
-        w = math.floor(w * ratio + 2 * margin)
-        h = math.floor(h * ratio + 2 * margin) 
-        imtoshow = gray[y:y+h, x:x+w]
-        # cv2.rectangle(gray, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        if minDist < threshold:
+            # add margin
+            x = max(math.floor(x * ratio - margin), 0)
+            y = max(math.floor(y * ratio - margin), 0)
+        if first_frame:
+            fw = math.floor(w * ratio + 2 * margin)
+            fh = math.floor(h * ratio + 2 * margin) 
         
+    # get rectangle
+    if not first_frame:
+        lerp_p = .3
+        if minDist < threshold:
+            x, y = lerp(xp, x, lerp_p), lerp(yp, y, lerp_p)
+        else:
+            x, y = xp, yp
         
 
+    if x >= 0:
+        patch = gray[y:y+fh, x:x+fw]
+        # Convert patch to feature vector
+
+        xp, yp = x, y
+    
     # Display the resulting frame
-    cv2.imshow('frame', image_resize(imtoshow, height=400, width=400) )
+    try:
+        cv2.imshow('frame', patch)
+        # cv2.imshow('frame', gray)
+    except:
+        print('finding face')
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
+    # check if faces were found
+    if (x >= 0):
+        first_frame = False
+    
+
 
 # When everything done, release the capture
 cap.release()
