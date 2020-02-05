@@ -1,7 +1,7 @@
 import cv2
 import numpy as np 
 
-path_to_video = 'video.mp4'
+path_to_video = 'video2.mp4'
 
 # Helper function
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -61,28 +61,21 @@ while(True):
     maxArea = 0
     minDist = np.inf
     for (_x, _y, _w, _h) in faces:
-        
-        if not first_frame:
-            if (_x - xp) ^ 2 + (_y - yp) ^ 2 < minDist:
-                x = _x
-                y = _y
-                w = _w
-                h = _h
-                xp = x
-                yp = y
-                maxArea = w*h
-                minDist = (_x - xp) ^ 2 + (_y - yp) ^ 2  
+
+        if  _w*_h > maxArea:
+            x = _x
+            y = _y
+            w = _w
+            h = _h
+            xp = x
+            yp = y
+            maxArea = w*h
+            first_frame = False
+
+        elif not first_frame and (_x - xp) ^ 2 + (_y - yp) ^ 2 < minDist:
+            maxArea = w*h
+            minDist = (_x - xp) ^ 2 + (_y - yp) ^ 2  
                 
-        else:
-            if  _w*_h > maxArea:
-                x = _x
-                y = _y
-                w = _w
-                h = _h
-                xp = x
-                yp = y
-                maxArea = w*h
-                first_frame = False
         
 
     #If one or more faces are found, draw a rectangle around the
