@@ -1,7 +1,10 @@
 import cv2
 import numpy as np 
+import math
 
-path_to_video = 'video2.mp4'
+path_to_video = 'video.mp4'
+margin = 50
+
 
 # Helper function
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -62,33 +65,33 @@ while(True):
     minDist = np.inf
     for (_x, _y, _w, _h) in faces:
 
-        if  _w*_h > maxArea:
+        if  first_frame and _w*_h > maxArea:
             x, y, w, h = _x, _y, _w, _h
-            xp = x
-            yp = y
-            maxArea = w*h
             first_frame = False
 
-        elif not first_frame and (_x - xp) ^ 2 + (_y - yp) ^ 2 < minDist:
-            maxArea = w*h
+        elif (_x - xp) ^ 2 + (_y - yp) ^ 2 < minDist:
+            x, y, w, h = _x, _y, _w, _h
             minDist = (_x - xp) ^ 2 + (_y - yp) ^ 2  
-                
+        
+        maxArea = w*h
+        xp = x
+        yp = y
         
 
     #If one or more faces are found, draw a rectangle around the
     #largest face present in the picture
     if maxArea > 0 :
-        x = np.floor(x * ratio).astype('int')
-        y = np.floor(y * ratio).astype('int')
-        w = np.floor(w * ratio).astype('int')
-        h = np.floor(h * ratio).astype('int')
+        x = max(math.floor(x * ratio - margin), 0)
+        y = max(math.floor(y * ratio - margin), 0)
+        w = math.floor(w * ratio + 2 * margin)
+        h = math.floor(h * ratio + 2 * margin) 
         imtoshow = gray[y:y+h, x:x+w]
         # cv2.rectangle(gray, (x, y), (x+w, y+h), (255, 0, 0), 2)
         
         
 
     # Display the resulting frame
-    cv2.imshow('frame',imtoshow)
+    cv2.imshow('frame', image_resize(imtoshow, height=400, width=400) )
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
