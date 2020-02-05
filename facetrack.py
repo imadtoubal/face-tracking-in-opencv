@@ -63,10 +63,7 @@ while(True):
     for (_x, _y, _w, _h) in faces:
 
         if  _w*_h > maxArea:
-            x = _x
-            y = _y
-            w = _w
-            h = _h
+            x, y, w, h = _x, _y, _w, _h
             xp = x
             yp = y
             maxArea = w*h
