@@ -67,9 +67,15 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 first_frame = True
 f = 0
 x = -1
+
+frames = []
+
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
+
+    if not ret:
+        break
 
     # Our operations on the frame come here
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -131,17 +137,14 @@ while(True):
     
     # Display the resulting frame
     try:
-        faceim = image_resize(patch, width=256);
-        # cv2.imwrite('output/output_{}.png'.format(f), faceim)
-        f = f + 1
+        faceim = image_resize(patch, width=256)
         input_tensor = preprocess(Image.fromarray(faceim))
         input_batch = input_tensor.unsqueeze(0)
 
-        with torch.no_grad():
-            output = model(input_batch)
+        # cv2.imwrite('output/output_{}.png'.format(f), faceim)
+        f = f + 1
+        frames.append(input_batch)
         
-        print(output[0], output[0].shape)
-
         # cv2.imshow('frame', faceim)
     except NameError:
         print('finding face')
@@ -152,6 +155,19 @@ while(True):
     if (x >= 0):
         first_frame = False
     
+
+frames = torch.cat(frames, dim=0)
+
+# move the input and model to GPU for speed if available
+if torch.cuda.is_available():
+    input_batch = input_batch.to('cuda')
+    model.to('cuda')
+
+# get features
+with torch.no_grad():
+    output = model(frames)
+
+np.savetxt('features.csv', output.cpu().numpy(), delimiter=', ')
 
 
 # When everything done, release the capture
