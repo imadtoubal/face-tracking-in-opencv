@@ -3,6 +3,7 @@ import numpy as np
 import math
 import argparse
 import os
+from tqdm import tqdm
 
 
 def lerp(a, b, p):
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     video_names = [vpath for vpath in os.listdir(
         args.inpath) if vpath[-4:] == '.mp4']
 
-    for video_name in video_names:
+    for video_name in tqdm(video_names, total=len(video_names)):
         path_to_video = os.path.join(args.inpath, video_name)
         output_path = os.path.join(
             args.inpath, f'{video_name[:-4]}_{str(out_size)}.avi')
