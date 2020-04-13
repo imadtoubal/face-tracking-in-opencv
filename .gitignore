@@ -1,3 +1,6 @@
 *.mp4
+*.avi
 output/*
 *.csv
+.vscode
+.DS_Store
