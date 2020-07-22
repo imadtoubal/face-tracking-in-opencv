@@ -1,4 +1,6 @@
 # Face tracking with OpenCV
+Robust face tracking technique in OpenCV and dlib. Uses an optimized implementation of Normalized Cross-Correlation (NCC) to track. Runs in ~60fps on CPU.
+
 
 ![](assets/preview.gif)
 
